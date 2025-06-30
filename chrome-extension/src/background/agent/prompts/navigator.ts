@@ -4,6 +4,7 @@ import { type HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { AgentContext } from '@src/background/agent/types';
 import { createLogger } from '@src/background/log';
 import { navigatorSystemPromptTemplate } from './templates/navigator';
+import { jobHuntNavigatorSystemPrompt } from './templates/jobhunt';
 
 const logger = createLogger('agent/prompts/navigator');
 
@@ -13,7 +14,8 @@ export class NavigatorPrompt extends BasePrompt {
   constructor(private readonly maxActionsPerStep = 10) {
     super();
 
-    const promptTemplate = navigatorSystemPromptTemplate;
+    // Use JobHuntLLM specialized navigator prompt
+    const promptTemplate = jobHuntNavigatorSystemPrompt;
     // Format the template with the maxActionsPerStep
     const formattedPrompt = promptTemplate.replace('{{max_actions}}', this.maxActionsPerStep.toString()).trim();
     this.systemMessage = new SystemMessage(formattedPrompt);

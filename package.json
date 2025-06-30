@@ -1,7 +1,7 @@
 {
-  "name": "nanobrowser",
+  "name": "jobhuntllm",
   "version": "0.1.7",
-  "description": "AI web automation tool",
+  "description": "AI-powered job application automation tool",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

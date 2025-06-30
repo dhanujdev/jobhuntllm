@@ -5,18 +5,22 @@ import { withErrorBoundary, withSuspense } from '@extension/shared';
 import { GeneralSettings } from './components/GeneralSettings';
 import { ModelSettings } from './components/ModelSettings';
 import { FirewallSettings } from './components/FirewallSettings';
+import { ResumeSettings } from './components/ResumeSettings';
+import { WorkflowSettings } from './components/WorkflowSettings';
 
-type TabTypes = 'general' | 'models' | 'firewall' | 'help';
+type TabTypes = 'general' | 'models' | 'firewall' | 'resume' | 'workflows' | 'help';
 
 const TABS: { id: TabTypes; icon: string; label: string }[] = [
-  { id: 'general', icon: '⚙️', label: 'General' },
+  { id: 'resume', icon: '📄', label: 'Resume' },
+  { id: 'workflows', icon: '🔄', label: 'Workflows' },
   { id: 'models', icon: '📊', label: 'Models' },
+  { id: 'general', icon: '⚙️', label: 'General' },
   { id: 'firewall', icon: '🔒', label: 'Firewall' },
   { id: 'help', icon: '📚', label: 'Help' },
 ];
 
 const Options = () => {
-  const [activeTab, setActiveTab] = useState<TabTypes>('models');
+  const [activeTab, setActiveTab] = useState<TabTypes>('resume');
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   // Check for dark mode preference
@@ -34,7 +38,7 @@ const Options = () => {
 
   const handleTabClick = (tabId: TabTypes) => {
     if (tabId === 'help') {
-      window.open('https://nanobrowser.ai/docs', '_blank');
+      window.open('https://github.com/nanobrowser/nanobrowser', '_blank');
     } else {
       setActiveTab(tabId);
     }
@@ -42,6 +46,10 @@ const Options = () => {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case 'resume':
+        return <ResumeSettings isDarkMode={isDarkMode} />;
+      case 'workflows':
+        return <WorkflowSettings isDarkMode={isDarkMode} />;
       case 'general':
         return <GeneralSettings isDarkMode={isDarkMode} />;
       case 'models':

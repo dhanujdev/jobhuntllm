@@ -479,6 +479,29 @@ export default class Page {
     }
   }
 
+  async scrollElement(elementId: number, direction: 'up' | 'down'): Promise<void> {
+    if (!this._puppeteerPage) {
+      throw new Error('Puppeteer page is not connected');
+    }
+    const success = await this._puppeteerPage.evaluate(
+      (elementId, direction) => {
+        const element = window.DOM_HASH_MAP[elementId];
+        if (!element) {
+          return false;
+        }
+        const scrollAmount = element.clientHeight * 0.8;
+        element.scrollBy(0, direction === 'down' ? scrollAmount : -scrollAmount);
+        return true;
+      },
+      elementId,
+      direction,
+    );
+
+    if (!success) {
+      throw new Error(`Could not find element with ID ${elementId} to scroll.`);
+    }
+  }
+
   async sendKeys(keys: string): Promise<void> {
     if (!this._puppeteerPage) {
       throw new Error('Puppeteer page is not connected');

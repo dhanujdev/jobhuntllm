@@ -13,6 +13,7 @@ import {
   scrollUpActionSchema,
   sendKeysActionSchema,
   scrollToTextActionSchema,
+  scrollElementActionSchema,
   cacheContentActionSchema,
   selectDropdownOptionActionSchema,
   getDropdownOptionsActionSchema,
@@ -24,6 +25,7 @@ import { createLogger } from '@src/background/log';
 import { ExecutionState, Actors } from '../event/types';
 import type { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { wrapUntrustedContent } from '../messages/utils';
+import { createJobHuntActions } from './jobhunt-actions';
 
 const logger = createLogger('Action');
 
@@ -438,6 +440,19 @@ export class ActionBuilder {
     }, scrollUpActionSchema);
     actions.push(scrollUp);
 
+    const scrollElement = new Action(async (input: z.infer<typeof scrollElementActionSchema.schema>) => {
+      const intent = input.reasoning || `Scrolling element ${input.elementId} ${input.direction}`;
+      this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_START, intent);
+
+      const page = await this.context.browserContext.getCurrentPage();
+      await page.scrollElement(input.elementId, input.direction);
+
+      const msg = `Scrolled element with index ${input.elementId} ${input.direction}.`;
+      this.context.emitEvent(Actors.NAVIGATOR, ExecutionState.ACT_OK, msg);
+      return new ActionResult({ extractedContent: msg, includeInMemory: true });
+    }, scrollElementActionSchema);
+    actions.push(scrollElement);
+
     // Keyboard Actions
     const sendKeys = new Action(async (input: z.infer<typeof sendKeysActionSchema.schema>) => {
       const intent = input.intent || `Send keys: ${input.keys}`;
@@ -598,6 +613,10 @@ export class ActionBuilder {
       true,
     );
     actions.push(selectDropdownOption);
+
+    // Add JobHuntLLM specific actions
+    const jobHuntActions = createJobHuntActions(this.context);
+    actions.push(...jobHuntActions);
 
     return actions;
   }

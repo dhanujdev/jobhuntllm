@@ -2,6 +2,7 @@ import { BasePrompt } from './base';
 import { type HumanMessage, SystemMessage } from '@langchain/core/messages';
 import type { AgentContext } from '@src/background/agent/types';
 import { validatorSystemPromptTemplate } from './templates/validator';
+import { jobHuntValidatorSystemPrompt } from './templates/jobhunt';
 
 export class ValidatorPrompt extends BasePrompt {
   private tasks: string[] = [];
@@ -34,7 +35,8 @@ ${previousTasks}
 
   getSystemMessage(): SystemMessage {
     const taskToValidate = this.tasksToValidate();
-    const message = validatorSystemPromptTemplate.replace('{{task_to_validate}}', taskToValidate);
+    // Use JobHuntLLM specialized validator prompt
+    const message = jobHuntValidatorSystemPrompt.replace('{{task_to_validate}}', taskToValidate);
     return new SystemMessage(message);
   }
   /**

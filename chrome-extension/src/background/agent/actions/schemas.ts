@@ -149,6 +149,17 @@ export const scrollToTextActionSchema: ActionSchema = {
   }),
 };
 
+export const scrollElementActionSchema: ActionSchema = {
+  name: 'scroll_element',
+  description: 'Scroll a specific element (like a modal or a scrollable div) up or down.',
+  schema: z.object({
+    intent: z.string().default('').describe('purpose of this action'),
+    elementId: z.number().describe('The index of the scrollable element to scroll.'),
+    direction: z.enum(['up', 'down']).describe("The direction to scroll ('up' or 'down')."),
+    reasoning: z.string().optional().describe('Reasoning for scrolling this element.'),
+  }),
+};
+
 export const getDropdownOptionsActionSchema: ActionSchema = {
   name: 'get_dropdown_options',
   description: 'Get all options from a native dropdown',

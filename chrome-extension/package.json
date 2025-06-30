@@ -1,7 +1,7 @@
 {
-  "name": "chrome-extension",
+  "name": "jobhuntllm-extension",
   "version": "0.1.7",
-  "description": "chrome extension - core settings",
+  "description": "JobHuntLLM Chrome Extension - AI job application automation",
   "type": "module",
   "scripts": {
     "clean:node_modules": "pnpx rimraf node_modules",

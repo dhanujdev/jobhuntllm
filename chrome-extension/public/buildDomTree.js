@@ -870,6 +870,28 @@ window.buildDomTree = (
   /**
    * Checks if an element is the topmost element at its position.
    */
+  function isScrollable(element) {
+    if (!element) return false;
+    const style = getCachedComputedStyle(element);
+    if (!style) return false;
+
+    const overflowY = style.overflowY;
+    const isScrollableY = overflowY === 'scroll' || overflowY === 'auto';
+
+    // Check if the element is actually scrollable (has content to scroll)
+    if (isScrollableY && element.scrollHeight > element.clientHeight) {
+      return true;
+    }
+
+    const overflowX = style.overflowX;
+    const isScrollableX = overflowX === 'scroll' || overflowX === 'auto';
+    if (isScrollableX && element.scrollWidth > element.clientWidth) {
+      return true;
+    }
+
+    return false;
+  }
+
   function isTopElement(element) {
     // Special case: when viewportExpansion is -1, consider all elements as "top" elements
     if (viewportExpansion === -1) {
@@ -1273,11 +1295,6 @@ window.buildDomTree = (
 
     if (debugMode) PERF_METRICS.nodeMetrics.totalNodes++;
 
-    if (!node || node.id === HIGHLIGHT_CONTAINER_ID) {
-      if (debugMode) PERF_METRICS.nodeMetrics.skippedNodes++;
-      return null;
-    }
-
     // Special handling for root node (body)
     if (node === document.body) {
       const nodeData = {
@@ -1392,6 +1409,7 @@ window.buildDomTree = (
         nodeData.isTopElement = isTopElement(node);
         if (nodeData.isTopElement) {
           nodeData.isInteractive = isInteractiveElement(node);
+          nodeData.isScrollable = isScrollable(node);
           // Call the dedicated highlighting function
           nodeWasHighlighted = handleHighlighting(nodeData, node, parentIframe, isParentHighlighted);
         }
@@ -1470,7 +1488,28 @@ window.buildDomTree = (
   isTextNodeVisible = measureTime(isTextNodeVisible);
   getEffectiveScroll = measureTime(getEffectiveScroll);
 
-  const rootId = buildDomTree(document.body);
+  // Ensure document.body exists before proceeding
+  let rootId = null;
+  try {
+    if (document && document.body) {
+      rootId = buildDomTree(document.body);
+    }
+  } catch (error) {
+    console.warn('Error building DOM tree:', error);
+    rootId = null;
+  }
+
+  // If rootId is still null, create a minimal fallback structure
+  if (rootId === null) {
+    rootId = `${ID.current++}`;
+    DOM_HASH_MAP[rootId] = {
+      tagName: 'body',
+      attributes: {},
+      xpath: '/body',
+      children: [],
+      error: 'Failed to build DOM tree',
+    };
+  }
 
   // Clear the cache before starting
   DOM_CACHE.clearCache();
